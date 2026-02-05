@@ -77,7 +77,8 @@
     .muted{color:var(--muted);font-size:.95rem}
 
     /* input */
-    input.text-input{padding:10px 12px;border-radius:10px;border:1px solid #f0dbe2;width:100%;max-width:640px;font-size:1rem}
+    input.text-input, textarea.text-area{padding:10px 12px;border-radius:10px;border:1px solid #f0dbe2;width:100%;max-width:640px;font-size:1rem}
+    textarea.text-area{min-height:86px;resize:vertical}
 
     .submit-all{margin-top:6px;padding:10px 16px;border-radius:10px;background:#b91c48;color:#fff;border:0;cursor:pointer;font-weight:700}
 
@@ -106,6 +107,7 @@
             <button class="ans no no-last evasive" id="q1-no" aria-label="No (try to click me)">No</button>
           </div>
         </div>
+        <div class="muted">(The No button is playful — it dodges and cannot be chosen.)</div>
       </div>
 
       <!-- Q2 -->
@@ -123,6 +125,7 @@
       <div class="q" id="q3" aria-labelledby="q3-label">
         <strong id="q3-label">3. This is our first Valentine's Day — could you make this special? How?</strong>
         <input class="text-input" id="q3-input" placeholder="Write something special..." aria-required="true" />
+        <div class="muted">(Required)</div>
       </div>
 
       <!-- Q4 -->
@@ -147,6 +150,13 @@
         </div>
       </div>
 
+      <!-- Q6 -->
+      <div class="q" id="q6" aria-labelledby="q6-label">
+        <strong id="q6-label">6. What do you like about me and what do you dislike? Am I a supportive person to you? Did you feel that in any situation?</strong>
+        <textarea class="text-area" id="q6-input" placeholder="Write your honest thoughts..." aria-required="true"></textarea>
+        <div class="muted">(Required)</div>
+      </div>
+
       <button class="submit-all" id="submit-all">Submit All — Send answers</button>
     </section>
   </main>
@@ -169,7 +179,7 @@
       const size = 12 + Math.random()*44;
       h.style.width = h.style.height = size+'px';
       h.style.left = (Math.random()*100)+'%';
-      h.style.top = (100 + Math.random()*20)+'%';
+      h.style.top = (100 + Math.random()*20)+'%;
       // softer pinks and reds for variety
       const hue = 320 + Math.random()*40; // pink/red
       h.style.background = `hsl(${hue},70%,66%)`;
@@ -216,12 +226,12 @@
       }
       btn.addEventListener('mouseenter', move);
       btn.addEventListener('focus', move);
-      btn.addEventListener('click', (e)=>{ e.preventDefault(); move(); showPopup(`<div class="big-heart">💕</div><p class="muted">You tried to click No — but love is playful!</p>`); });
+      btn.addEventListener('click', (e)=>{ e.preventDefault(); move(); showPopup(`<div class=\"big-heart\">💕</div><p class=\"muted\">You tried to click No — but love is playful!</p>`); });
       btn.addEventListener('keydown', (e)=>{ if(e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); move(); } });
     }
     document.querySelectorAll('.evasive').forEach(makeEvasive);
 
-    /* Record Yes answers only and include Q3 message */
+    /* Record Yes answers only and include Q3 & Q6 messages */
     const answers = {};
     document.querySelectorAll('button.ans[data-q]').forEach(btn=>{
       const q = btn.dataset.q;
@@ -231,49 +241,64 @@
         if(answer === 'yes'){
           answers[q] = 'Yes';
           if(q === '1'){
-            showPopup(`<div class="big-heart">❤️</div><div class="emoji">👫</div><h3>Yay!! Love You Purusha❤️❤️❤️</h3>`);
+            showPopup(`<div class=\"big-heart\">❤️</div><div class=\"emoji\">👫</div><h3>Yay!! Love You Apdinu</h3>`);
           } else if(q === '2'){
-            showPopup(`<div class="big-heart">❤️</div><p class="muted">Glad you liked the surprise!</p>`);
+            showPopup(`<div class=\"big-heart\">❤️</div><p class=\"muted\">Glad you liked the surprise!</p>`);
           } else if(q === '4'){
-            showPopup(`<div class="big-heart">💘</div><p class="muted">You're making me the happiest person.</p>`);
+            showPopup(`<div class=\"big-heart\">💘</div><p class=\"muted\">You're making me the happiest person.</p>`);
           } else if(q === '5'){
-            showPopup(`<div class="big-heart">🎉💝</div><p class="muted">Let's plan something lovely together!</p>`);
+            showPopup(`<div class=\"big-heart\">🎉💝</div><p class=\"muted\">Let's plan something lovely together!</p>`);
           }
         }
       });
     });
 
-    /* Submit All opens mail client with prefilled answers to riyassad77@gmail.com */
+    /* Final Submit validation: require Q1,Q2,Q3,Q4,Q5,Q6 answered (Q1..Q5 by Yes click, Q3 & Q6 text inputs required) */
     document.getElementById('submit-all').addEventListener('click', ()=>{
-      const qKeys = ['1','2','3','4','5'];
-      const qLabels = {
-        '1':'Do you love me?',
-        '2':'Do you like this surprise?',
-        '3':"Our first Valentine's Day - message",
-        '4':'Will you be my Valentine?',
-        '5':"Can we celebrate together on Valentine's Day?"
-      };
+      const requiredQs = ['1','2','3','4','5','6'];
+      const missing = [];
+      // check Q1,Q2,Q4,Q5 yes answers
+      ['1','2','4','5'].forEach(k=>{ if(answers[k] !== 'Yes') missing.push(k); });
+      // check Q3 and Q6 inputs
+      const q3val = document.getElementById('q3-input').value.trim();
+      const q6val = document.getElementById('q6-input').value.trim();
+      if(!q3val) missing.push('3');
+      if(!q6val) missing.push('6');
+
+      if(missing.length){
+        // show a friendly message listing missing questions
+        const map = {
+          '1':'Do you love me?',
+          '2':'Do you like this surprise?',
+          '3':"Our first Valentine's Day - message",
+          '4':'Will you be my Valentine?',
+          '5':"Can we celebrate together on Valentine's Day?",
+          '6':'What you like/dislike & support message'
+        };
+        const list = missing.map(m=>`Q${m}: ${map[m] || ''}`).join('<br>');
+        showPopup(`<h3>Please answer the missing items</h3><p class=\"muted\">${list}</p>`);
+        return;
+      }
+
+      // all answered - collect lines and open mailto
       const lines = [];
-      qKeys.forEach(key=>{
-        if(key === '3'){
-          const val = document.getElementById('q3-input').value.trim();
-          lines.push(`${qLabels[key]}: ${val || '(no message)'}`);
-        } else {
-          lines.push(`${qLabels[key]}: ${answers[key] === 'Yes' ? 'Yes' : '(No selection / evasive No)'}`);
-        }
-      });
+      lines.push(`Do you love me?: Yes`);
+      lines.push(`Do you like this surprise?: Yes`);
+      lines.push(`Our first Valentine's Day - message: ${q3val}`);
+      lines.push(`Will you be my Valentine?: Yes`);
+      lines.push(`Can we celebrate together on Valentine's Day?: Yes`);
+      lines.push(`What you like/dislike & support message: ${q6val}`);
 
       const body = encodeURIComponent(lines.join('\n'));
       const subject = encodeURIComponent("Valentine Quiz Answers — Sadham & Soram");
       const to = "riyassad77@gmail.com";
       const mailto = `mailto:${to}?subject=${subject}&body=${body}`;
-      // open user's mail client (they must press Send)
       window.location.href = mailto;
-      showPopup(`<h3>Mail draft opened</h3><p class="muted">A pre-filled email to <strong>${to}</strong> should open in your mail app. Please press Send to deliver.</p>`);
+      showPopup(`<h3>Mail draft opened</h3><p class=\"muted\">A pre-filled email to <strong>${to}</strong> should open in your mail app. Please press Send to deliver.</p>`);
     });
 
     /* small helper to escape if needed */
-    function escapeHtml(s){ return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
+    function escapeHtml(s){ return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll("\"",'&quot;').replaceAll("'","&#39;"); }
   </script>
 </body>
 </html>
