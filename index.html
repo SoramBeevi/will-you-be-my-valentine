@@ -1,302 +1,63 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Sadham Hussain ♥ Soram Beevi — Valentine Quiz</title>
-  <style>
-    :root{
-      --bg-pink: #ffe6ec;
-      --card: #fff;
-      --accent:#ff4d6d;
-      --blue:#3b8cff;
-      --red:#ff2d6f;
-      --muted:#6b5b6e;
-    }
-
-    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial, sans-serif;background:var(--bg-pink);color:#222}
-    /* center the page perfectly on desktop and smaller screens */
-    body{display:flex;align-items:center;justify-content:center;padding:24px}
-
-    /* container */
-    .card{
-      width:min(920px,96vw);
-      max-width:980px;
-      background:linear-gradient(180deg,#fff 0%, #fff0f6 100%);
-      border-radius:18px;
-      padding:28px;
-      box-shadow:0 18px 40px rgba(0,0,0,.12);
-      position:relative;
-      z-index:2;
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-      align-items:center;
-      text-align:center;
-      margin-top: 25%;
-    }
-
-    h1{margin:0;font-size:1.5rem;color:#7b1530;letter-spacing:0.2px}
-    .names{font-weight:700;color:#b91c48;font-size:1.05rem;margin-top:2px}
-    p.lead{margin:0;color:var(--muted)}
-
-    /* floating hearts background */
-    .hearts{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
-    .heart{
-      position:absolute;
-      width:28px;height:28px;
-      transform:rotate(45deg);
-      background:var(--accent);
-      filter:drop-shadow(0 6px 12px rgba(0,0,0,.08));
-    }
-    .heart:before,.heart:after{content:"";position:absolute;width:100%;height:100%;background:inherit;border-radius:50%}
-    .heart:before{top:-50%}
-    .heart:after{left:-50%}
-    @keyframes floatUp{0%{transform:translateY(0) rotate(45deg) scale(1);opacity:1}100%{transform:translateY(-120vh) rotate(45deg) scale(.6);opacity:0}}
-
-    /* quiz layout */
-    .quiz{width:100%;display:grid;gap:14px;align-items:center;justify-items:stretch}
-    .q{background:rgba(255,255,255,0.95);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
-    .q strong{display:block;color:#7b1530}
-
-    .controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-    button.ans{padding:10px 16px;border-radius:999px;border:0;cursor:pointer;font-weight:700;box-shadow:0 8px 18px rgba(0,0,0,.06)}
-    button.yes{background:linear-gradient(90deg,var(--red),#ff5a77);color:white}
-    button.no{background:linear-gradient(90deg,var(--blue),#6eb6ff);color:white}
-
-    /* place No button last in DOM but visually next to Yes */
-    .controls .btn-wrap{display:inline-flex;align-items:center;gap:8px}
-    .controls .btn-wrap button{margin:0}
-    .controls .no-last{order:2} /* ensure last in flow but still visually beside yes due to inline layout */
-
-    /* modal */
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:20;opacity:0;pointer-events:none;transition:all .18s}
-    .modal.show{opacity:1;pointer-events:auto}
-    .popup{background:white;padding:22px;border-radius:14px;text-align:center;min-width:260px;max-width:92vw}
-    .big-heart{font-size:4.6rem;line-height:1;margin-bottom:6px}
-    .emoji{font-size:2.2rem}
-    .muted{color:var(--muted);font-size:.95rem}
-
-    /* input */
-    input.text-input, textarea.text-area{padding:10px 12px;border-radius:10px;border:1px solid #f0dbe2;width:100%;max-width:640px;font-size:1rem}
-    textarea.text-area{min-height:86px;resize:vertical}
-
-    .submit-all{margin-top:6px;padding:10px 16px;border-radius:10px;background:#b91c48;color:#fff;border:0;cursor:pointer;font-weight:700}
-
-    @media (max-width:720px){
-      .card{padding:20px}
-      .big-heart{font-size:3.6rem}
-    }
-  </style>
-</head>
-<body>
-  <div class="hearts" aria-hidden="true"></div>
-
-  <main class="card" role="main" aria-labelledby="title">
-    <h1 id="title">Will you be my Valentine? — Quiz</h1>
-    <div class="names">Sadham Hussain ♥ Soram Beevi</div>
-    <p class="lead">A sweet interactive quiz — background hearts, playful No buttons, and a send option.</p>
-
-    <section class="quiz" aria-live="polite">
-      <!-- Q1 -->
-      <div class="q" id="q1" aria-labelledby="q1-label">
-        <strong id="q1-label">1. Do you love me? (Yes or No)</strong>
-        <div class="controls">
-          <div class="btn-wrap">
-            <button class="ans yes" data-q="1" data-answer="yes" id="q1-yes">Yes</button>
-            <!-- No button is last in DOM (appears after Yes) and will be evasive; visually it sits beside Yes -->
-            <button class="ans no no-last evasive" id="q1-no" aria-label="No (try to click me)">No</button>
-          </div>
-        </div>
+<section class="quiz" aria-live="polite">
+  <!-- Q1 -->
+  <div class="q" id="q1" aria-labelledby="q1-label">
+    <strong id="q1-label">1. Do you love me? (Yes or No)</strong>
+    <div class="controls">
+      <div class="btn-wrap">
+        <button class="ans yes" data-q="1" data-answer="yes" id="q1-yes">Yes</button>
+        <!-- No button is last in DOM and evasive -->
+        <button class="ans no no-last evasive" id="q1-no" aria-label="No (try to click me)">No</button>
       </div>
+    </div>
+    <div class="muted">(The No button is playful — it dodges and cannot be chosen.)</div>
+  </div>
 
-      <!-- Q2 -->
-      <div class="q" id="q2" aria-labelledby="q2-label">
-        <strong id="q2-label">2. Do you like this surprise? (Yes or No)</strong>
-        <div class="controls">
-          <div class="btn-wrap">
-            <button class="ans yes" data-q="2" data-answer="yes" id="q2-yes">Yes</button>
-            <button class="ans no no-last evasive" id="q2-no">No</button>
-          </div>
-        </div>
+  <!-- Q2 -->
+  <div class="q" id="q2" aria-labelledby="q2-label">
+    <strong id="q2-label">2. Do you like this surprise? (Yes or No)</strong>
+    <div class="controls">
+      <div class="btn-wrap">
+        <button class="ans yes" data-q="2" data-answer="yes" id="q2-yes">Yes</button>
+        <button class="ans no no-last evasive" id="q2-no">No</button>
       </div>
-
-      <!-- Q3 -->
-      <div class="q" id="q3" aria-labelledby="q3-label">
-        <strong id="q3-label">3. This is our first Valentine's Day — could you make this special? How?</strong>
-        <input class="text-input" id="q3-input" placeholder="Write something special..." aria-required="true" />
-      </div>
-
-      <!-- Q4 -->
-      <div class="q" id="q4" aria-labelledby="q4-label">
-        <strong id="q4-label">4. Will you be my Valentine?</strong>
-        <div class="controls">
-          <div class="btn-wrap">
-            <button class="ans yes" data-q="4" data-answer="yes">Yes</button>
-            <button class="ans no no-last evasive" id="q4-no">No</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Q5 -->
-      <div class="q" id="q5" aria-labelledby="q5-label">
-        <strong id="q5-label">5. Can we celebrate together on Valentine's Day?</strong>
-        <div class="controls">
-          <div class="btn-wrap">
-            <button class="ans yes" data-q="5" data-answer="yes">Yes</button>
-            <button class="ans no no-last evasive" id="q5-no">No</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Q6 -->
-      <div class="q" id="q6" aria-labelledby="q6-label">
-        <strong id="q6-label">6. What do you like about me and what do you dislike? Am I a supportive person to you? Did you feel that in any situation?</strong>
-        <textarea class="text-area" id="q6-input" placeholder="Write your honest thoughts..." aria-required="true"></textarea>
-      </div>
-
-      <button class="submit-all" id="submit-all">Submit All — Send answers</button>
-    </section>
-  </main>
-
-  <!-- modal -->
-  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="popup" id="popup">
-      <div id="popup-content" aria-live="polite"></div>
-      <div style="height:12px"></div>
-      <button class="ans" id="close-popup" style="background:#eee;color:#333">Close</button>
     </div>
   </div>
 
-  <script>
-    /* Background heart spawner (baby-pink themed) */
-    const heartsContainer = document.querySelector('.hearts');
-    function spawnHeart(){
-      const h = document.createElement('div');
-      h.className = 'heart';
-      const size = 12 + Math.random()*44;
-      h.style.width = h.style.height = size+'px';
-      h.style.left = (Math.random()*100)+'%';
-      h.style.top = (100 + Math.random()*20)+'%;
-      // softer pinks and reds for variety
-      const hue = 320 + Math.random()*40; // pink/red
-      h.style.background = `hsl(${hue},70%,66%)`;
-      h.style.opacity = 0.9 - Math.random()*0.5;
-      h.style.animation = 'floatUp '+(8+Math.random()*8)+'s linear forwards';
-      heartsContainer.appendChild(h);
-      setTimeout(()=>h.remove(),18000);
-    }
-    for(let i=0;i<12;i++) setTimeout(spawnHeart,i*110);
-    setInterval(spawnHeart,420);
+  <!-- Q3 -->
+  <div class="q" id="q3" aria-labelledby="q3-label">
+    <strong id="q3-label">3. This is our first Valentine's Day — could you make this special? How?</strong>
+    <input class="text-input" id="q3-input" placeholder="Write something special..." aria-required="true" />
+    <div class="muted">(Required)</div>
+  </div>
 
-    /* Modal helpers */
-    const modal = document.getElementById('modal');
-    const popupContent = document.getElementById('popup-content');
-    const closePopup = document.getElementById('close-popup');
-    function showPopup(html){
-      popupContent.innerHTML = html;
-      modal.classList.add('show');
-      modal.setAttribute('aria-hidden','false');
-      closePopup.focus();
-    }
-    function hidePopup(){
-      modal.classList.remove('show');
-      modal.setAttribute('aria-hidden','true');
-    }
-    closePopup.addEventListener('click', hidePopup);
-    modal.addEventListener('click', (e)=>{ if(e.target===modal) hidePopup(); });
-    document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') hidePopup(); });
+  <!-- Q4 -->
+  <div class="q" id="q4" aria-labelledby="q4-label">
+    <strong id="q4-label">4. Will you be my Valentine?</strong>
+    <div class="controls">
+      <div class="btn-wrap">
+        <button class="ans yes" data-q="4" data-answer="yes">Yes</button>
+        <button class="ans no no-last evasive" id="q4-no">No</button>
+      </div>
+    </div>
+  </div>
 
-    /* Evasive No buttons (they are last in DOM but visually beside Yes) */
-    function makeEvasive(btn){
-      const parentQ = btn.closest('.q');
-      function move(){
-        const rect = parentQ.getBoundingClientRect();
-        const bw = btn.offsetWidth, bh = btn.offsetHeight;
-        const padding = 8;
-        const maxX = Math.max(0, rect.width - bw - padding*2);
-        const maxY = Math.max(0, rect.height - bh - padding*2 - 20);
-        const x = Math.floor(Math.random()*maxX) + padding;
-        const y = Math.floor(Math.random()*maxY) + padding + 20;
-        btn.style.position = 'relative';
-        btn.style.left = x + 'px';
-        btn.style.top = y + 'px';
-      }
-      btn.addEventListener('mouseenter', move);
-      btn.addEventListener('focus', move);
-      btn.addEventListener('click', (e)=>{ e.preventDefault(); move(); showPopup(`<div class=\"big-heart\">💕</div><p class=\"muted\">You tried to click No — but love is playful!</p>`); });
-      btn.addEventListener('keydown', (e)=>{ if(e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); move(); } });
-    }
-    document.querySelectorAll('.evasive').forEach(makeEvasive);
+  <!-- Q5 -->
+  <div class="q" id="q5" aria-labelledby="q5-label">
+    <strong id="q5-label">5. Can we celebrate together on Valentine's Day?</strong>
+    <div class="controls">
+      <div class="btn-wrap">
+        <button class="ans yes" data-q="5" data-answer="yes">Yes</button>
+        <button class="ans no no-last evasive" id="q5-no">No</button>
+      </div>
+    </div>
+  </div>
 
-    /* Record Yes answers only and include Q3 & Q6 messages */
-    const answers = {};
-    document.querySelectorAll('button.ans[data-q]').forEach(btn=>{
-      const q = btn.dataset.q;
-      const answer = btn.dataset.answer;
-      btn.addEventListener('click', (e)=>{
-        e.preventDefault();
-        if(answer === 'yes'){
-          answers[q] = 'Yes';
-          if(q === '1'){
-            showPopup(`<div class=\"big-heart\">❤️</div><div class=\"emoji\">👫</div><h3>Yay!! Love You Apdinu</h3>`);
-          } else if(q === '2'){
-            showPopup(`<div class=\"big-heart\">❤️</div><p class=\"muted\">Glad you liked the surprise!</p>`);
-          } else if(q === '4'){
-            showPopup(`<div class=\"big-heart\">💘</div><p class=\"muted\">You're making me the happiest person.</p>`);
-          } else if(q === '5'){
-            showPopup(`<div class=\"big-heart\">🎉💝</div><p class=\"muted\">Let's plan something lovely together!</p>`);
-          }
-        }
-      });
-    });
+  <!-- Q6 (new) -->
+  <div class="q" id="q6" aria-labelledby="q6-label">
+    <strong id="q6-label">6. What do you like about me and what do you dislike? Am I a supportive person to you? Did you feel that in any situation?</strong>
+    <textarea class="text-area" id="q6-input" placeholder="Write your honest thoughts..." aria-required="true"></textarea>
+    <div class="muted">(Required)</div>
+  </div>
 
-    /* Final Submit validation: require Q1,Q2,Q3,Q4,Q5,Q6 answered (Q1..Q5 by Yes click, Q3 & Q6 text inputs required) */
-    document.getElementById('submit-all').addEventListener('click', ()=>{
-      const requiredQs = ['1','2','3','4','5','6'];
-      const missing = [];
-      // check Q1,Q2,Q4,Q5 yes answers
-      ['1','2','4','5'].forEach(k=>{ if(answers[k] !== 'Yes') missing.push(k); });
-      // check Q3 and Q6 inputs
-      const q3val = document.getElementById('q3-input').value.trim();
-      const q6val = document.getElementById('q6-input').value.trim();
-      if(!q3val) missing.push('3');
-      if(!q6val) missing.push('6');
-
-      if(missing.length){
-        // show a friendly message listing missing questions
-        const map = {
-          '1':'Do you love me?',
-          '2':'Do you like this surprise?',
-          '3':"Our first Valentine's Day - message",
-          '4':'Will you be my Valentine?',
-          '5':"Can we celebrate together on Valentine's Day?",
-          '6':'What you like/dislike & support message'
-        };
-        const list = missing.map(m=>`Q${m}: ${map[m] || ''}`).join('<br>');
-        showPopup(`<h3>Please answer the missing items</h3><p class=\"muted\">${list}</p>`);
-        return;
-      }
-
-      // all answered - collect lines and open mailto
-      const lines = [];
-      lines.push(`Do you love me?: Yes`);
-      lines.push(`Do you like this surprise?: Yes`);
-      lines.push(`Our first Valentine's Day - message: ${q3val}`);
-      lines.push(`Will you be my Valentine?: Yes`);
-      lines.push(`Can we celebrate together on Valentine's Day?: Yes`);
-      lines.push(`What you like/dislike & support message: ${q6val}`);
-
-      const body = encodeURIComponent(lines.join('\n'));
-      const subject = encodeURIComponent("Valentine Quiz Answers — Sadham & Soram");
-      const to = "riyassad77@gmail.com";
-      const mailto = `mailto:${to}?subject=${subject}&body=${body}`;
-      window.location.href = mailto;
-      showPopup(`<h3>Mail draft opened</h3><p class=\"muted\">A pre-filled email to <strong>${to}</strong> should open in your mail app. Please press Send to deliver.</p>`);
-    });
-
-    /* small helper to escape if needed */
-    function escapeHtml(s){ return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll("\"",'&quot;').replaceAll("'","&#39;"); }
-  </script>
-</body>
-</html>
+  <button class="submit-all" id="submit-all">Submit All — Send answers</button>
+</section>
