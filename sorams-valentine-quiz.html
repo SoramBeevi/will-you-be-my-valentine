@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Valentine Quiz</title>
+  <style>
+    :root{
+      --bg1:#ffdde1;
+      --bg2:#fadadd;
+      --card: rgba(255,255,255,0.85);
+      --accent:#ff5c8a;
+      --accent-dark:#e0436e;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: linear-gradient(135deg,var(--bg1),var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      color:#333;
+    }
+
+    /* floating hearts backdrop */
+    .hearts{position:fixed;inset:0;pointer-events:none;z-index:0;}
+    .heart{
+      position:absolute;
+      width:24px;
+      height:24px;
+      transform:translateY(120vh) rotate(0deg);
+      opacity:0;
+      animation-name:floatUp;
+      animation-timing-function:linear;
+      animation-iteration-count:infinite;
+    }
+    .heart:before, .heart:after{
+      content:'';position:absolute;left:50%;top:0;width:50%;height:80%;background:var(--accent);border-radius:50% 50% 0 0;transform-origin:0% 100%;
+    }
+    .heart:before{transform:translateX(-50%) rotate(-45deg);}
+    .heart:after{transform:translateX(-50%) rotate(45deg);}
+
+    @keyframes floatUp{
+      0%{transform:translateY(120vh) scale(0.6) rotate(0deg);opacity:0}
+      10%{opacity:1}
+      100%{transform:translateY(-10vh) scale(1.1) rotate(360deg);opacity:0}
+    }
+
+    /* quiz card */
+    .card{
+      position:relative;
+      z-index:1;
+      width:min(720px,94vw);
+      background:var(--card);
+      border-radius:16px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.12);
+      padding:28px;
+    }
+    h1{margin:0 0 12px 0;font-size:1.6rem;color:var(--accent-dark)}
+    p.lead{margin:0 0 18px 0;color:#555}
+
+    .question{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;margin-bottom:10px;background:linear-gradient(180deg,rgba(255,255,255,0.6),rgba(255,255,255,0.4));}
+    .qtext{font-weight:600}
+    .choices{display:flex;gap:8px}
+    button.choice{padding:8px 14px;border-radius:999px;border:2px solid transparent;background:white;cursor:pointer;font-weight:600}
+    button.choice.yes{color:var(--accent-dark);border-color:rgba(255,92,138,0.15)}
+    button.choice.no{color:#6b7280;border-color:rgba(0,0,0,0.05)}
+    button.choice:disabled{opacity:0.6;cursor:default}
+
+    .result{margin-top:12px;font-size:0.95rem;color:#444}
+    .controls{display:flex;gap:8px;margin-top:16px}
+    .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+    .btn.reset{background:#fff;border:1px solid rgba(0,0,0,0.06)}
+    .btn.share{background:linear-gradient(90deg,var(--accent),var(--accent-dark));color:white}
+
+    /* small flourish when answer chosen */
+    .pulse{animation:pulse 420ms ease}
+    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+
+    footer{margin-top:10px;color:#666;font-size:0.9rem;text-align:center}
+
+    @media (max-width:480px){.question{flex-direction:column;align-items:flex-start}.choices{margin-top:8px}}
+  </style>
+</head>
+<body>
+  <div class="hearts" aria-hidden="true"></div>
+
+  <main class="card" role="main" aria-labelledby="title">
+    <h1 id="title">Will you be my Valentine?</h1>
+    <p class="lead">A tiny yes/no quiz full of heart — choose your answers and share the love.</p>
+
+    <div id="quiz">
+      <div class="question" data-index="0">
+        <div class="qtext">Do you like surprises?</div>
+        <div class="choices">
+          <button class="choice yes" data-answer="yes" type="button">Yes</button>
+          <button class="choice no" data-answer="no" type="button">No</button>
+        </div>
+      </div>
+
+      <div class="question" data-index="1">
+        <div class="qtext">Would you go on a walk under the stars with me?</div>
+        <div class="choices">
+          <button class="choice yes" data-answer="yes" type="button">Yes</button>
+          <button class="choice no" data-answer="no" type="button">No</button>
+        </div>
+      </div>
+
+      <div class="question" data-index="2">
+        <div class="qtext">Do you enjoy chocolate?</div>
+        <div class="choices">
+          <button class="choice yes" data-answer="yes" type="button">Yes</button>
+          <button class="choice no" data-answer="no" type="button">No</button>
+        </div>
+      </div>
+
+      <div class="question" data-index="3">
+        <div class="qtext">Will you dance with me to a slow song?</div>
+        <div class="choices">
+          <button class="choice yes" data-answer="yes" type="button">Yes</button>
+          <button class="choice no" data-answer="no" type="button">No</button>
+        </div>
+      </div>
+
+      <div class="question" data-index="4">
+        <div class="qtext">Would you like to keep making memories together?</div>
+        <div class="choices">
+          <button class="choice yes" data-answer="yes" type="button">Yes</button>
+          <button class="choice no" data-answer="no" type="button">No</button>
+        </div>
+      </div>
+
+      <div class="result" id="result">You haven't answered yet — pick any option to see a little celebration ❤️</div>
+
+      <div class="controls">
+        <button class="btn reset" id="reset">Reset</button>
+        <button class="btn share" id="share">Share result</button>
+      </div>
+
+      <footer>Made with lots of hearts 💌</footer>
+    </div>
+  </main>
+
+  <script>
+    // create floating hearts in the background
+    const heartsLayer = document.querySelector('.hearts');
+    const HEART_COUNT = 26;
+    for(let i=0;i<HEART_COUNT;i++){
+      const h = document.createElement('div');
+      h.className = 'heart';
+      const size = Math.floor(Math.random()*22)+14; // 14..36
+      h.style.width = size+'px';
+      h.style.height = size+'px';
+      const left = Math.random()*100; // percent
+      h.style.left = left+'%';
+      const delay = Math.random()*-20; // start offset
+      const dur = 8 + Math.random()*10; // 8..18s
+      h.style.animationDuration = dur+'s';
+      h.style.animationDelay = delay+'s';
+      // vary color slightly
+      const r = 255; const g = 92 + Math.floor(Math.random()*80); const b = 138 + Math.floor(Math.random()*30);
+      h.style.setProperty('--c', `rgb(${r},${g},${b})`);
+      h.style.setProperty('background', 'transparent');
+      // use box-shadow hack to color pseudo elements via inline style
+      h.style.setProperty('filter', 'drop-shadow(0 0 0 rgba(0,0,0,0))');
+      heartsLayer.appendChild(h);
+    }
+
+    // quiz logic
+    const questions = Array.from(document.querySelectorAll('.question'));
+    const resultEl = document.getElementById('result');
+    const answers = Array(questions.length).fill(null);
+
+    function updateResult(){
+      const answered = answers.filter(a=>a!==null).length;
+      if(answered===0){ resultEl.textContent = "You haven't answered yet — pick any option to see a little celebration ❤️"; return }
+      const yesCount = answers.filter(a=>a==='yes').length;
+      resultEl.textContent = `Answered ${answered}/${answers.length}. ${yesCount} said yes — feeling hopeful!`;
+    }
+
+    function burstHearts(x,y,count=12){
+      for(let i=0;i<count;i++){
+        const b = document.createElement('div');
+        b.className = 'heart';
+        const size = 12 + Math.random()*18;
+        b.style.width = size+'px'; b.style.height = size+'px';
+        b.style.left = (x + (Math.random()-0.5)*120)+'px';
+        b.style.top = (y + (Math.random()-0.5)*60)+'px';
+        b.style.animationDuration = (1 + Math.random()*1.2)+'s';
+        b.style.animationDelay = '0s';
+        b.style.opacity = 1;
+        b.style.transform = 'translateY(0)';
+        heartsLayer.appendChild(b);
+        // remove after animation
+        setTimeout(()=>b.remove(),1600);
+      }
+    }
+
+    questions.forEach((q,idx)=>{
+      q.addEventListener('click', (e)=>{
+        const btn = e.target.closest('button.choice');
+        if(!btn) return;
+        if(btn.disabled) return;
+        const answer = btn.dataset.answer;
+        answers[idx]=answer;
+        // disable both buttons for this question
+        q.querySelectorAll('button.choice').forEach(b=>b.disabled=true);
+        // small pulse
+        q.classList.add('pulse');
+        setTimeout(()=>q.classList.remove('pulse'),420);
+
+        // show immediate feedback
+        if(answer==='yes'){
+          btn.textContent = '❤️ Yes';
+          const rect = btn.getBoundingClientRect();
+          burstHearts(rect.left + rect.width/2, rect.top + rect.height/2, 10);
+        } else {
+          btn.textContent = '💙 No';
+        }
+        updateResult();
+      });
+    });
+
+    document.getElementById('reset').addEventListener('click', ()=>{
+      answers.fill(null);
+      questions.forEach(q=>{
+        q.querySelectorAll('button.choice').forEach(b=>{b.disabled=false; if(b.dataset.answer==='yes') b.textContent='Yes'; else b.textContent='No'});
+      });
+      updateResult();
+    });
+
+    document.getElementById('share').addEventListener('click', ()=>{
+      const yesCount = answers.filter(a=>a==='yes').length;
+      const answered = answers.filter(a=>a!==null).length;
+      const text = `I answered ${yesCount}/${answered} "Yes" on the Valentine quiz — will you be my Valentine? ❤️`;
+      if(navigator.share){
+        navigator.share({text}).catch(()=>navigator.clipboard.writeText(text));
+      } else {
+        navigator.clipboard.writeText(text).then(()=> alert('Result copied to clipboard!'));
+      }
+    });
+
+    // initial
+    updateResult();
+  </script>
+</body>
+</html>
