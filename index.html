@@ -3,247 +3,216 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Valentine Quiz</title>
+  <title>Will you be my Valentine — Quiz</title>
   <style>
-    :root{
-      --bg1:#ffdde1;
-      --bg2:#fadadd;
-      --card: rgba(255,255,255,0.85);
-      --accent:#ff5c8a;
-      --accent-dark:#e0436e;
-    }
-    html,body{height:100%;}
-    body{
-      margin:0;
-      font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-      background: linear-gradient(135deg,var(--bg1),var(--bg2));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      overflow:hidden;
-      color:#333;
-    }
+    :root{--bg:#111;--card:#fff;--accent:#ff4d6d}
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{background:linear-gradient(180deg,#2b1a30 0%, #1b1a40 100%);color:#111;display:flex;align-items:center;justify-content:center;padding:32px}
 
-    /* floating hearts backdrop */
-    .hearts{position:fixed;inset:0;pointer-events:none;z-index:0;}
-    .heart{
-      position:absolute;
-      width:24px;
-      height:24px;
-      transform:translateY(120vh) rotate(0deg);
-      opacity:0;
-      animation-name:floatUp;
-      animation-timing-function:linear;
-      animation-iteration-count:infinite;
-    }
-    .heart:before, .heart:after{
-      content:'';position:absolute;left:50%;top:0;width:50%;height:80%;background:var(--accent);border-radius:50% 50% 0 0;transform-origin:0% 100%;
-    }
-    .heart:before{transform:translateX(-50%) rotate(-45deg);}
-    .heart:after{transform:translateX(-50%) rotate(45deg);}
+    /* floating heart background */
+    .hearts{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+    .heart{position:absolute;width:28px;height:28px;background:var(--accent);transform:rotate(45deg);left:50%;top:50%;opacity:.9}
+    .heart:before,.heart:after{content:"";position:absolute;width:28px;height:28px;background:inherit;border-radius:50%}
+    .heart:before{top:-14px}
+    .heart:after{left:-14px}
+    @keyframes floatUp{0%{transform:translateY(0) rotate(45deg) scale(1)}100%{transform:translateY(-110vh) rotate(45deg) scale(.6);opacity:0}}
 
-    @keyframes floatUp{
-      0%{transform:translateY(120vh) scale(0.6) rotate(0deg);opacity:0}
-      10%{opacity:1}
-      100%{transform:translateY(-10vh) scale(1.1) rotate(360deg);opacity:0}
-    }
+    /* card */
+    .card{width:min(820px,96vw);max-width:960px;background:linear-gradient(180deg,#fff 0%, #ffeef3 100%);border-radius:16px;padding:28px;box-shadow:0 10px 30px rgba(0,0,0,.35);position:relative;z-index:2}
+    h1{margin:0 0 6px;font-size:1.6rem;color:#7b1530}
+    p.lead{margin:0 0 20px;color:#4b2330}
 
-    /* quiz card */
-    .card{
-      position:relative;
-      z-index:1;
-      width:min(720px,94vw);
-      background:var(--card);
-      border-radius:16px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.12);
-      padding:28px;
-    }
-    h1{margin:0 0 12px 0;font-size:1.6rem;color:var(--accent-dark)}
-    p.lead{margin:0 0 18px 0;color:#555}
+    .quiz{display:grid;grid-template-columns:1fr;gap:18px}
+    .q{background:rgba(255,255,255,0.95);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+    .q .controls{display:flex;gap:12px;align-items:center}
+    button.ans{padding:10px 16px;border-radius:999px;border:0;cursor:pointer;font-weight:600}
+    button.yes{background:linear-gradient(90deg,#ff5a77,#ff2d6f);color:white}
+    button.no{background:linear-gradient(90deg,#6eb6ff,#3b8cff);color:white}
 
-    .question{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;margin-bottom:10px;background:linear-gradient(180deg,rgba(255,255,255,0.6),rgba(255,255,255,0.4));}
-    .qtext{font-weight:600}
-    .choices{display:flex;gap:8px}
-    button.choice{padding:8px 14px;border-radius:999px;border:2px solid transparent;background:white;cursor:pointer;font-weight:600}
-    button.choice.yes{color:var(--accent-dark);border-color:rgba(255,92,138,0.15)}
-    button.choice.no{color:#6b7280;border-color:rgba(0,0,0,0.05)}
-    button.choice:disabled{opacity:0.6;cursor:default}
+    /* modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:10;opacity:0;pointer-events:none;transition:all .18s}
+    .modal.show{opacity:1;pointer-events:auto}
+    .popup{background:white;padding:28px;border-radius:16px;text-align:center;min-width:280px}
+    .big-heart{font-size:6rem;line-height:1}
+    .emoji{font-size:2.4rem}
 
-    .result{margin-top:12px;font-size:0.95rem;color:#444}
-    .controls{display:flex;gap:8px;margin-top:16px}
-    .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
-    .btn.reset{background:#fff;border:1px solid rgba(0,0,0,0.06)}
-    .btn.share{background:linear-gradient(90deg,var(--accent),var(--accent-dark));color:white}
+    /* input */
+    .text-input{padding:10px 12px;border-radius:8px;border:1px solid #ddd;width:100%;max-width:520px}
 
-    /* small flourish when answer chosen */
-    .pulse{animation:pulse 420ms ease}
-    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+    /* helper */
+    .muted{color:#6b5b6e;font-size:.95rem}
 
-    footer{margin-top:10px;color:#666;font-size:0.9rem;text-align:center}
-
-    @media (max-width:480px){.question{flex-direction:column;align-items:flex-start}.choices{margin-top:8px}}
+    /* responsive */
+    @media (max-width:520px){.big-heart{font-size:4.5rem}}
   </style>
 </head>
 <body>
   <div class="hearts" aria-hidden="true"></div>
 
-  <main class="card" role="main" aria-labelledby="title">
-    <h1 id="title">Will you be my Valentine?</h1>
-    <p class="lead">A tiny yes/no quiz full of heart — choose your answers and share the love.</p>
+  <main class="card" role="main">
+    <h1>Will you be my Valentine? — Quiz</h1>
+    <p class="lead">A little surprise with hearts and playful buttons. Click and enjoy 💌</p>
 
-    <div id="quiz">
-      <div class="question" data-index="0">
-        <div class="qtext">Do you like surprises?</div>
-        <div class="choices">
-          <button class="choice yes" data-answer="yes" type="button">Yes</button>
-          <button class="choice no" data-answer="no" type="button">No</button>
+    <section class="quiz" aria-live="polite">
+      <!-- Q1 -->
+      <div class="q" id="q1">
+        <strong>1. Do you love me?</strong>
+        <div class="controls">
+          <button class="ans yes" data-q="1" data-answer="yes">Yes</button>
+          <button class="ans no" id="q1-no" data-q="1" data-answer="no">No</button>
+        </div>
+        <div class="muted">(Try to click No if you can...)</div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="q" id="q2">
+        <strong>2. Do you like this surprise?</strong>
+        <div class="controls">
+          <button class="ans yes" data-q="2" data-answer="yes">Yes</button>
+          <button class="ans no" data-q="2" data-answer="no">No</button>
         </div>
       </div>
 
-      <div class="question" data-index="1">
-        <div class="qtext">Would you go on a walk under the stars with me?</div>
-        <div class="choices">
-          <button class="choice yes" data-answer="yes" type="button">Yes</button>
-          <button class="choice no" data-answer="no" type="button">No</button>
+      <!-- Q3 -->
+      <div class="q" id="q3">
+        <strong>3. This is our first Valentine's Day — could you make this special? How?</strong>
+        <form id="q3-form">
+          <input class="text-input" id="q3-input" required placeholder="Write something special..." />
+          <div style="height:8px"></div>
+          <button class="ans yes" type="submit">Send</button>
+        </form>
+      </div>
+
+      <!-- Q4 -->
+      <div class="q" id="q4">
+        <strong>4. Will you be my Valentine?</strong>
+        <div class="controls">
+          <button class="ans yes" data-q="4" data-answer="yes">Yes</button>
+          <button class="ans no" data-q="4" data-answer="no">No</button>
         </div>
       </div>
 
-      <div class="question" data-index="2">
-        <div class="qtext">Do you enjoy chocolate?</div>
-        <div class="choices">
-          <button class="choice yes" data-answer="yes" type="button">Yes</button>
-          <button class="choice no" data-answer="no" type="button">No</button>
+      <!-- Q5 -->
+      <div class="q" id="q5">
+        <strong>5. Can we celebrate together on Valentine's Day?</strong>
+        <div class="controls">
+          <button class="ans yes" data-q="5" data-answer="yes">Yes</button>
+          <button class="ans no" data-q="5" data-answer="no">No</button>
         </div>
       </div>
-
-      <div class="question" data-index="3">
-        <div class="qtext">Will you dance with me to a slow song?</div>
-        <div class="choices">
-          <button class="choice yes" data-answer="yes" type="button">Yes</button>
-          <button class="choice no" data-answer="no" type="button">No</button>
-        </div>
-      </div>
-
-      <div class="question" data-index="4">
-        <div class="qtext">Would you like to keep making memories together?</div>
-        <div class="choices">
-          <button class="choice yes" data-answer="yes" type="button">Yes</button>
-          <button class="choice no" data-answer="no" type="button">No</button>
-        </div>
-      </div>
-
-      <div class="result" id="result">You haven't answered yet — pick any option to see a little celebration ❤️</div>
-
-      <div class="controls">
-        <button class="btn reset" id="reset">Reset</button>
-        <button class="btn share" id="share">Share result</button>
-      </div>
-
-      <footer>Made with lots of hearts 💌</footer>
-    </div>
+    </section>
   </main>
 
+  <!-- modal -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="popup" id="popup">
+      <div id="popup-content"></div>
+      <div style="height:12px"></div>
+      <button class="ans" id="close-popup" style="background:#eee;color:#333">Close</button>
+    </div>
+  </div>
+
   <script>
-    // create floating hearts in the background
-    const heartsLayer = document.querySelector('.hearts');
-    const HEART_COUNT = 26;
-    for(let i=0;i<HEART_COUNT;i++){
+    // create floating hearts in background
+    const heartsContainer = document.querySelector('.hearts');
+    function spawnHeart(){
       const h = document.createElement('div');
       h.className = 'heart';
-      const size = Math.floor(Math.random()*22)+14; // 14..36
-      h.style.width = size+'px';
-      h.style.height = size+'px';
-      const left = Math.random()*100; // percent
-      h.style.left = left+'%';
-      const delay = Math.random()*-20; // start offset
-      const dur = 8 + Math.random()*10; // 8..18s
-      h.style.animationDuration = dur+'s';
-      h.style.animationDelay = delay+'s';
-      // vary color slightly
-      const r = 255; const g = 92 + Math.floor(Math.random()*80); const b = 138 + Math.floor(Math.random()*30);
-      h.style.setProperty('--c', `rgb(${r},${g},${b})`);
-      h.style.setProperty('background', 'transparent');
-      // use box-shadow hack to color pseudo elements via inline style
-      h.style.setProperty('filter', 'drop-shadow(0 0 0 rgba(0,0,0,0))');
-      heartsLayer.appendChild(h);
+      const size = 12 + Math.random()*36;
+      h.style.width = h.style.height = size+'px';
+      h.style.left = (Math.random()*100)+'%';
+      h.style.top = (100 + Math.random()*20)+'%';
+      h.style.background = `hsl(${Math.random()*30+330},70%,60%)`;
+      h.style.opacity = 0.9 - Math.random()*0.4;
+      h.style.animation = 'floatUp '+(8+Math.random()*6)+'s linear forwards';
+      h.style.transform = 'rotate(45deg)';
+      heartsContainer.appendChild(h);
+      setTimeout(()=>h.remove(),14000);
     }
+    setInterval(spawnHeart,450);
 
-    // quiz logic
-    const questions = Array.from(document.querySelectorAll('.question'));
-    const resultEl = document.getElementById('result');
-    const answers = Array(questions.length).fill(null);
-
-    function updateResult(){
-      const answered = answers.filter(a=>a!==null).length;
-      if(answered===0){ resultEl.textContent = "You haven't answered yet — pick any option to see a little celebration ❤️"; return }
-      const yesCount = answers.filter(a=>a==='yes').length;
-      resultEl.textContent = `Answered ${answered}/${answers.length}. ${yesCount} said yes — feeling hopeful!`;
+    // helpers
+    const modal = document.getElementById('modal');
+    const popupContent = document.getElementById('popup-content');
+    const closePopup = document.getElementById('close-popup');
+    function showPopup(html){
+      popupContent.innerHTML = html;
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden','false');
     }
-
-    function burstHearts(x,y,count=12){
-      for(let i=0;i<count;i++){
-        const b = document.createElement('div');
-        b.className = 'heart';
-        const size = 12 + Math.random()*18;
-        b.style.width = size+'px'; b.style.height = size+'px';
-        b.style.left = (x + (Math.random()-0.5)*120)+'px';
-        b.style.top = (y + (Math.random()-0.5)*60)+'px';
-        b.style.animationDuration = (1 + Math.random()*1.2)+'s';
-        b.style.animationDelay = '0s';
-        b.style.opacity = 1;
-        b.style.transform = 'translateY(0)';
-        heartsLayer.appendChild(b);
-        // remove after animation
-        setTimeout(()=>b.remove(),1600);
-      }
+    function hidePopup(){
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden','true');
     }
+    closePopup.addEventListener('click',hidePopup);
+    modal.addEventListener('click',(e)=>{ if(e.target===modal) hidePopup(); });
 
-    questions.forEach((q,idx)=>{
-      q.addEventListener('click', (e)=>{
-        const btn = e.target.closest('button.choice');
-        if(!btn) return;
-        if(btn.disabled) return;
+    // Q1 trick: make No button dodge/move when hovered or clicked
+    const q1No = document.getElementById('q1-no');
+    const q1Box = document.getElementById('q1');
+    function moveButton(btn){
+      const rect = q1Box.getBoundingClientRect();
+      const bw = btn.offsetWidth, bh = btn.offsetHeight;
+      const padding = 12;
+      const x = Math.random()*(rect.width - bw - padding*2) + padding;
+      const y = Math.random()*(rect.height - bh - padding*2) + padding + 24; // leave space for question text
+      btn.style.position = 'relative';
+      btn.style.left = x+'px';
+      btn.style.top = y+'px';
+    }
+    q1No.addEventListener('mouseenter', ()=>moveButton(q1No));
+    q1No.addEventListener('click', (e)=>{ e.preventDefault(); moveButton(q1No); });
+
+    // generic answer handling
+    document.querySelectorAll('button.ans[data-q]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const q = btn.dataset.q;
         const answer = btn.dataset.answer;
-        answers[idx]=answer;
-        // disable both buttons for this question
-        q.querySelectorAll('button.choice').forEach(b=>b.disabled=true);
-        // small pulse
-        q.classList.add('pulse');
-        setTimeout(()=>q.classList.remove('pulse'),420);
-
-        // show immediate feedback
-        if(answer==='yes'){
-          btn.textContent = '❤️ Yes';
-          const rect = btn.getBoundingClientRect();
-          burstHearts(rect.left + rect.width/2, rect.top + rect.height/2, 10);
-        } else {
-          btn.textContent = '💙 No';
+        if(q==='1'){
+          if(answer==='yes'){
+            showPopup(`<div class=\"big-heart\">❤️</div><div class=\"emoji\">👫</div><h3>Yay!! Love you</h3>`);
+          } else {
+            // no moved above; optional small tease
+            showPopup(`<h3>Hmm... you tried to click No 💕</h3><p class=\"muted\">But love finds a way.</p>`);
+          }
+        } else if(q==='2'){
+          if(answer==='yes'){
+            showPopup(`<div class=\"big-heart\">❤️</div><p class=\"muted\">Glad you liked the surprise!</p>`);
+          } else {
+            showPopup(`<div class=\"big-heart\" style=\"color:blue\">💙</div><p class=\"muted\">Thanks for your honesty — I'll try to make it better!</p>`);
+          }
+        } else if(q==='4'){
+          if(answer==='yes'){
+            showPopup(`<div class=\"big-heart\">💘</div><p class=\"muted\">You're making me the happiest person.</p>`);
+          } else {
+            showPopup(`<div class=\"big-heart\" style=\"color:blue\">💔</div><p class=\"muted\">It's okay — I still care about you.</p>`);
+          }
+        } else if(q==='5'){
+          if(answer==='yes'){
+            showPopup(`<div class=\"big-heart\">🎉💝</div><p class=\"muted\">Let's plan something lovely!</p>`);
+          } else {
+            showPopup(`<div class=\"big-heart\" style=\"color:blue\">😔</div><p class=\"muted\">Maybe another day — I'm here when you're ready.</p>`);
+          }
         }
-        updateResult();
       });
     });
 
-    document.getElementById('reset').addEventListener('click', ()=>{
-      answers.fill(null);
-      questions.forEach(q=>{
-        q.querySelectorAll('button.choice').forEach(b=>{b.disabled=false; if(b.dataset.answer==='yes') b.textContent='Yes'; else b.textContent='No'});
-      });
-      updateResult();
+    // Q3 form handling
+    document.getElementById('q3-form').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const val = document.getElementById('q3-input').value.trim();
+      if(!val) return; // required
+      showPopup(`<div class=\"big-heart\">❤️</div><h3>Thank you!</h3><p class=\"muted\">\"${escapeHtml(val)}\"</p>`);
+      document.getElementById('q3-form').reset();
     });
 
-    document.getElementById('share').addEventListener('click', ()=>{
-      const yesCount = answers.filter(a=>a==='yes').length;
-      const answered = answers.filter(a=>a!==null).length;
-      const text = `I answered ${yesCount}/${answered} "Yes" on the Valentine quiz — will you be my Valentine? ❤️`;
-      if(navigator.share){
-        navigator.share({text}).catch(()=>navigator.clipboard.writeText(text));
-      } else {
-        navigator.clipboard.writeText(text).then(()=> alert('Result copied to clipboard!'));
-      }
-    });
+    function escapeHtml(s){ return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#39;"); }
 
-    // initial
-    updateResult();
+    // small accessibility: keyboard support for q1 no (space triggers move)
+    q1No.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key===' ') { e.preventDefault(); moveButton(q1No); } });
+
+    // seed a few hearts immediately
+    for(let i=0;i<8;i++) setTimeout(spawnHeart, i*150);
   </script>
 </body>
 </html>
